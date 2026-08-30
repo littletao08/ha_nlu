@@ -13,9 +13,15 @@ from typing import Any, Literal
 
 import aiohttp
 
-from homeassistant.components import agent, conversation, intent
+from homeassistant.components import conversation
+from homeassistant.components.conversation.chat_log import AssistantContent
+from homeassistant.components.conversation.models import (
+    ConversationInput,
+    ConversationResult,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Context
+from homeassistant.helpers import intent
 
 from .const import CONF_URL, DEFAULT_URL
 
@@ -259,11 +265,11 @@ class HaNluConversationEntity(
             continue_conversation = (plan.get("plan") or {}).get("status") == "ask"
 
         chat_log.async_add_assistant_content_without_tools(
-            agent.AssistantContent(agent_id=user_input.agent_id, content=speech)
+            AssistantContent(agent_id=user_input.agent_id, content=speech)
         )
         response = intent.IntentResponse(language=user_input.language)
         response.async_set_speech(speech)
-        return agent.ConversationResult(
+        return ConversationResult(
             conversation_id=None,
             response=response,
             continue_conversation=continue_conversation,
