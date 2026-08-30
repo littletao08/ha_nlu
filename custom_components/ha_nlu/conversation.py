@@ -20,14 +20,24 @@ from homeassistant.components.conversation.models import (
     ConversationResult,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import Context
+from homeassistant.core import Context, HomeAssistant
 from homeassistant.helpers import intent
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import CONF_URL, DEFAULT_URL
 
 _LOGGER = logging.getLogger(__name__)
 
 MATCH_ALL: Literal["*"] = "*"
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the conversation entity from a config entry."""
+    async_add_entities([HaNluConversationEntity(config_entry)])
 
 CONFIRM_TEXT = {
     "climate_control": "好的，空调设置已完成。",
