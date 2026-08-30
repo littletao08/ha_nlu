@@ -107,6 +107,19 @@ class HaNluConversationEntity(
         state = self.hass.states.get(entity_id)
         return state.state if state else None
 
+    def _fmt(self, value: str | None, suffix: str = "") -> str:
+        """Format a sensor value, rounding floats and stripping trailing zeros."""
+        if value is None:
+            return "未知"
+        try:
+            f = float(value)
+            txt = f"{f:.1f}"
+            if txt.endswith(".0"):
+                txt = txt[:-2]
+            return f"{txt}{suffix}"
+        except (TypeError, ValueError):
+            return f"{value}{suffix}"
+
     async def _async_env_speech(self, plan: Mapping[str, Any], p: Mapping[str, Any]) -> str:
         metric = p.get("metric", "temperature")
         entities: list[str] = list(p.get("entities") or [])
@@ -119,12 +132,12 @@ class HaNluConversationEntity(
             return None
 
         if metric == "humidity":
-            return f"{prefix}湿度是 {val(1) or val(0)}%"
+            return f"{prefix}湿度是 {self._fmt(val(1) or val(0), '%')}"
         if metric == "both":
-            return f"{prefix}温度是 {val(0)} 度，湿度是 {val(1)}%"
+            return f"{prefix}温度是 {self._fmt(val(0), '度')}，湿度是 {self._fmt(val(1), '%')}"
         if metric == "illuminance":
-            return f"{prefix}光照度是 {val(0)} 勒克斯"
-        return f"{prefix}当前温度是 {val(0)} 度"
+            return f"{prefix}光照度是 {self._fmt(val(0))} 勒克斯"
+        return f"{prefix}当前温度是 {self._fmt(val(0), '度')}"
 
     def _async_occ_speech(self, p: Mapping[str, Any]) -> str:
         entities: list[str] = list(p.get("entities") or [])
