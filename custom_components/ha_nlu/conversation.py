@@ -104,7 +104,7 @@ class HaNluConversationEntity(
     # ---------------- speech assembly ----------------
 
     def _state(self, entity_id: str) -> str | None:
-        state = self.hass.states.async_get(entity_id)
+        state = self.hass.states.get(entity_id)
         return state.state if state else None
 
     async def _async_env_speech(self, plan: Mapping[str, Any], p: Mapping[str, Any]) -> str:
@@ -195,7 +195,7 @@ class HaNluConversationEntity(
         op = action.get("op")
 
         if op == "set_temp_by_delta":
-            state = hass.states.async_get(entity_id) if entity_id else None
+            state = hass.states.get(entity_id) if entity_id else None
             current = state.attributes.get("current_temperature") if state else None
             if current is None:
                 return
@@ -208,7 +208,7 @@ class HaNluConversationEntity(
                 blocking=False,
             )
         elif op == "volume_relative":
-            state = hass.states.async_get(entity_id) if entity_id else None
+            state = hass.states.get(entity_id) if entity_id else None
             current = state.attributes.get("volume_level") if state else None
             if current is not None:
                 level = max(
