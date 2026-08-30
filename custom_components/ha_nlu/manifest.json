@@ -1,7 +1,7 @@
 {
   "domain": "ha_nlu",
   "name": "HA NLU Intent Service",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "codeowners": ["@littletao08"],
   "config_flow": true,
   "documentation": "https://github.com/littletao08/ha_nlu",

@@ -188,16 +188,30 @@ class HaNluConversationEntity(
             elif a_type == "state":
                 await self._async_execute_state(action, entity_id, context)
             elif a_type == "button":
-                await hass.services.async_call(
-                    "button",
-                    "press",
-                    {},
-                    target={"entity_id": action.get("entity_ref")},
-                    context=context,
-                    blocking=False,
-                )
+                ref = action.get("entity_ref") or ""
+                if ref and self.hass.states.get(ref):
+                    await hass.services.async_call(
+                        "button",
+                        "press",
+                        {},
+                        target={"entity_id": ref},
+                        context=context,
+                        blocking=False,
+                    )
+                else:
+                    _LOGGER.warning("button entity not available: %s", ref)
             elif a_type == "notify":
-                _LOGGER.info("play_text notify requested: %s", action.get("text"))
+                ref = action.get("entity_ref") or ""
+                if ref.startswith("notify."):
+                    await hass.services.async_call(
+                        "notify",
+                        ref[len("notify."):],
+                        {"message": action.get("text", "")},
+                        context=context,
+                        blocking=False,
+                    )
+                else:
+                    _LOGGER.warning("notify action without a notify entity ref: %s", action)
         return True
 
     async def _async_execute_state(
@@ -267,7 +281,7 @@ class HaNluConversationEntity(
             return "查询成功。"
         if status == "execute":
             await self._async_execute(p, context)
-            return p.get("notify_text") or CONFIRM_TEXT.get(intent_name, "好的。")
+            return CONFIRM_TEXT.get(intent_name, "好的。")
         return "抱歉，这句我没有听懂。"
 
     # ---------------- entity protocol ----------------
